@@ -1,4 +1,6 @@
-#Author Sebastián López 
+
+// # Autor  : Sebastian Lopez
+// # E-Mail : sebalopezgc@gmail.com
 
 
 # TestBatteryDischarge
