@@ -12,15 +12,23 @@
 #define ANALOG_BATTERY_E A4
 #define ANALOG_BATTERY_F A5
 
-#define VOLTAGE_MIN_BATTERY 2.5
+#define VOLTAGE_MIN_BATTERY 2.4
 
-const long numInputs = 6;  // Number Analog Input
-long analogInputs[numInputs] = {ANALOG_BATTERY_A, ANALOG_BATTERY_B, ANALOG_BATTERY_C, ANALOG_BATTERY_D, ANALOG_BATTERY_E,ANALOG_BATTERY_F}; // Array analogoc Imput 
+const int numInputs = 6;  // Number Analog Input
+int analogInputs[numInputs] = {ANALOG_BATTERY_A, ANALOG_BATTERY_B, ANALOG_BATTERY_C, ANALOG_BATTERY_D, ANALOG_BATTERY_E,ANALOG_BATTERY_F}; // Array analogoc Imput 
+
+const int numOutputs = 6; // Number Digital Output
+int digitalOutput[numOutputs] = {DIGITAL_BATTERY_A, DIGITAL_BATTERY_B, DIGITAL_BATTERY_C, DIGITAL_BATTERY_D, DIGITAL_BATTERY_E,DIGITAL_BATTERY_F}; // Array Digital Outputs 
+
+const int batteryNum = 6;
+bool batteryArray[batteryNum] = {1, 1, 1, 1, 1, 1};
+
+
 
 int analogValue = 0;
 float voltage = 0;
 float voltageFinal = 0;
-
+bool flag = false;
 void setup() {
   Serial.begin(9600);  // Start Serial Protocol
   pinMode(DIGITAL_BATTERY_A, OUTPUT);
@@ -33,33 +41,38 @@ void setup() {
 
 void loop() {
   outputOnTransistor();
+  flag = false;
   forBattery();
   _delay_ms(60000);
   outputOffTransistor();
+  flag = true;
   forBattery();
   _delay_ms(60000);
 }
 void outputOnTransistor(){
-  digitalWrite(DIGITAL_BATTERY_A, HIGH);
-  digitalWrite(DIGITAL_BATTERY_B, HIGH); 
-  digitalWrite(DIGITAL_BATTERY_C, HIGH); 
-  digitalWrite(DIGITAL_BATTERY_D, HIGH); 
-  digitalWrite(DIGITAL_BATTERY_E, HIGH); 
-  digitalWrite(DIGITAL_BATTERY_F, HIGH);    // ON pin1
+  for (int i = 0; i < 6; i++){
+    if(batteryArray[i]==1)
+    {
+    digitalWrite(digitalOutput[i], HIGH);
+    }
+  }
+  
 }
 void outputOffTransistor(){
-  digitalWrite(DIGITAL_BATTERY_A, LOW);
-  digitalWrite(DIGITAL_BATTERY_B, LOW);
-  digitalWrite(DIGITAL_BATTERY_C, LOW);
-  digitalWrite(DIGITAL_BATTERY_D, LOW);
-  digitalWrite(DIGITAL_BATTERY_E, LOW);
-  digitalWrite(DIGITAL_BATTERY_F, LOW);  
+ for (int i = 0; i < 6; i++){
+    digitalWrite(digitalOutput[i], LOW);
+  }
 }
 
 void forBattery(){
   for (int i = 0; i < 6; i++){
   analogValue = analogRead(analogInputs[i]);
   voltage = 0.0048 * analogValue;
+  if(flag == false){
+    if(voltage <= VOLTAGE_MIN_BATTERY){
+        batteryArray[i]  = 0;
+    }
+  }
   Serial.print(i);
   Serial.print("|");
   Serial.println(voltage,3);
