@@ -1,54 +1,42 @@
 import sqlite3
 import matplotlib.pyplot as plt
-from datetime import datetime
 from matplotlib.animation import FuncAnimation
 
-# Función para obtener los datos de la base de datos SQLite
-def get_dates():
+# Función para obtener los datos de la base de datos
+def obtener_datos():
     conn = sqlite3.connect("DischargeBattery")
     cursor = conn.cursor()
-    cursor.execute("SELECT idBattery, date, Voltage FROM DischargeBattery ORDER BY date")
-    result = cursor.fetchall()
+    cursor.execute("SELECT id, idBattery, Voltage FROM DischargeBattery")
+    data = cursor.fetchall()
     conn.close()
-    dates_idBattery = {}
-    for row in result:
-        idBattery = row[0]
-        dateTime = row[1]
-        voltage = row[2]
-        if idBattery not in dates_idBattery:
-            dates_idBattery[idBattery] = {'dateTime': [], 'voltages': []}
-        dates_idBattery[idBattery]['dateTime'].append(dateTime)
-        dates_idBattery[idBattery]['voltages'].append(voltage)
-    return dates_idBattery
+    return data
 
-# Función para inicializar la gráfica
-def initialize_graph():
-    fig, ax = plt.subplots(figsize=(10, 6))
-    ax.set_title('Voltage vs. Time idBattery')
-    ax.set_xlabel('Time')
-    ax.set_ylabel('Voltage')
-    ax.grid(True)
-    return fig, ax
+# Función para actualizar el gráfico en tiempo real
+def actualizar_grafico(i):
+    data = obtener_datos()
+    
+    datos_por_bateria = {}
+    for fila in data:
+        id_bateria = fila[1]
+        voltaje = fila[2]
+        
+        if id_bateria not in datos_por_bateria:
+            datos_por_bateria[id_bateria] = {'ids': [], 'voltajes': []}
+        
+        datos_por_bateria[id_bateria]['ids'].append(fila[0])
+        datos_por_bateria[id_bateria]['voltajes'].append(voltaje)
 
-# Función para actualizar la gráfica en tiempo real
-def update_graph(i):
-    dates_idBattery = get_dates()
-    ax.clear()
-    for idBattery, data in dates_idBattery.items():
-        dateTime = data['dateTime']
-        voltages = data['voltages']
-        ax.plot(dateTime, voltages, marker='o', linestyle='-', label=f'idBattery {idBattery}')
-    ax.set_title('Voltage vs. Time idBattery')
-    ax.set_xlabel('Time')
-    ax.set_ylabel('Voltage')
-    ax.grid(True)
-    ax.legend()
+    plt.clf()
+    for id_bateria, datos in datos_por_bateria.items():
+        plt.plot(datos['ids'], datos['voltajes'], marker='o', label=f'ID de Batería {id_bateria}')
 
-# Crear la figura y el eje inicial
-fig, ax = initialize_graph()
+    plt.xlabel('ID')
+    plt.ylabel('Voltaje')
+    plt.title('Gráfico de Voltaje vs. ID por ID de Batería')
+    plt.legend()
+    plt.grid(True)
 
-# Crear la animación para actualizar la gráfica cada 30 segundos
-ani = FuncAnimation(fig, update_graph, interval=30000)  # 30000 milisegundos = 30 segundos
+# Crear una animación para actualizar el gráfico en tiempo real
+ani = FuncAnimation(plt.gcf(), actualizar_grafico, interval=36000)  # Actualiza cada 1 segundo (1000 ms)
 
-# Mostrar la gráfica
 plt.show()
