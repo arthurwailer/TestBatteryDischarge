@@ -2,7 +2,7 @@ import sqlite3
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
-# Función para obtener los datos de la base de datos
+
 def obtener_datos():
     conn = sqlite3.connect("DischargeBattery")
     cursor = conn.cursor()
@@ -11,7 +11,7 @@ def obtener_datos():
     conn.close()
     return data
 
-# Función para actualizar el gráfico en tiempo real
+
 def actualizar_grafico(i):
     data = obtener_datos()
     
@@ -28,7 +28,7 @@ def actualizar_grafico(i):
 
     plt.clf()
     for id_bateria, datos in datos_por_bateria.items():
-        plt.plot(datos['ids'], datos['voltajes'], marker='o', label=f'ID de Batería {id_bateria}')
+        plt.plot(datos['ids'], datos['voltajes'], marker='.', label=f'ID de Batería {id_bateria}')
 
     plt.xlabel('ID')
     plt.ylabel('Voltaje')
@@ -36,7 +36,7 @@ def actualizar_grafico(i):
     plt.legend()
     plt.grid(True)
 
-# Crear una animación para actualizar el gráfico en tiempo real
-ani = FuncAnimation(plt.gcf(), actualizar_grafico, interval=36000)  # Actualiza cada 1 segundo (1000 ms)
+
+ani = FuncAnimation(plt.gcf(), actualizar_grafico, interval=36000)  #
 
 plt.show()
